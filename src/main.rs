@@ -203,7 +203,13 @@ async fn index(req: HttpRequest) -> Result<HttpResponse, Box<dyn Error>> {
             if content_type == "image/jpeg" {
                 let resp_bytes = resp.bytes().await.unwrap();
 
-                let image = image::load_from_memory(&resp_bytes).unwrap();
+                let image = match image::load_from_memory(&resp_bytes) {
+                    Ok(img) => img,
+                    Err(err) => {
+                        eprintln!("Error: {}", err);
+                        return Err(err.into());
+                    }
+                };
 
                 let encoder = webp::Encoder::from_image(&image).unwrap();
 
